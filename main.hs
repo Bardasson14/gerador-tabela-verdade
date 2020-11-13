@@ -60,3 +60,7 @@ treeInsert x (Node left a right) 2 = Node left a (singleton x)
 --Se for passado Empty como parametro, a árvore assumirá a forma do singleton x (uma folha)
 --treeInsert x "none" (Node left a right) = singleton x --Quando a árvore passada for vazia, retornar apenas o singleton (folha)
 --treeInsert x "left" (Node left a right) = Node (treeInsert x left) a --right
+
+operators = ["|", "&", "->", "<->", "¬"]
+
+--PRÓXIMO PASSO: APLICAR MAP
