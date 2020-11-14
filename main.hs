@@ -7,13 +7,9 @@ main = do
     let finalParsedFormula = addExternalParenthesis parsedFormula
     let matchingParenthesisList = getMatchingParenthesis finalParsedFormula
     let subFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
-    --let externalParenthesis = (0, length parsedFormula)
-    --let finalParenthesisList = externalParenthesis:matchingParenthesisList
     print matchingParenthesisList
     print subFormulas
 
---splitFormula :: [a] -> [[a]]
---splitFormula string = map (:[]) string
 
 removeUnusedChars :: [Char] -> [Char]
 removeUnusedChars formula = [c | c <- formula, c /= ' ', c /='>']
@@ -30,11 +26,5 @@ addExternalParenthesis :: String -> String
 addExternalParenthesis [] = []
 addExternalParenthesis (x:xs) = "("++x:xs++")"
 
---NÃO INCLUIR FINAL NEM INICIO
---sliceSubFormulas :: Int -> Int -> [a] -> [a]
+sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula)| x <- matchingParenthesis]
-
---FAZER SLICE DAS SUBFORMULAS DE ACORDO COM A EXISTENCIA NA LISTA DE PARENTESES
-
---createSubformulasList [] parsedFormula = []
---createSubformulasList matchingParenthesis parsedFormula = [ sliceSubFormulas ((fst x) (snd x) parsedFormula) | x <- matchingParenthesis] 
