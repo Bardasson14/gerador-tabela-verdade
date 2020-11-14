@@ -7,11 +7,8 @@ main = do
     let matchingParenthesisList = getMatchingParenthesis finalParsedFormula
     let subFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
     let varList = [[x]|x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
-    let truthTableHeader = nub varList ++ subFormulas 
-    
-    print truthTableHeader
-    --print matchingParenthesisList
-    --print subFormulas
+    let entries = nub varList ++ subFormulas --CONSERTAR OPERADOR (->) NO CABEÇALHO
+    print entries
 
 removeUnusedChars :: [Char] -> [Char]
 removeUnusedChars formula = [c | c <- formula, c /= ' ', c /='>']
@@ -29,7 +26,7 @@ addExternalParenthesis [] = []
 addExternalParenthesis (x:xs) = "("++x:xs++")"
 
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
-sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula)| x <- matchingParenthesis]
+sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
 
---toString :: Char -> String
---toString c = [c]
+operators = ["-", "|", "&", "~"] --OPERADORES SUPORTADOS
+--RESOLVER RECURSIVAMENTE AS FÓRMULAS A ESQUERDA E A DIREITA, P/CADA SUBFORMULA EM subFormulas
