@@ -1,7 +1,6 @@
 import Data.List
-import Data.Function
-import Data.Maybe (fromJust)
-
+--import Data.Function
+--import Data.Maybe (fromJust)
 
 type Letra = Char
 data Formula = Var Letra
@@ -12,7 +11,7 @@ data Formula = Var Letra
   | Empty
 
 main = do 
-    putStrLn "Digite a fórmula: "
+    putStrLn "Digite a fórmula:"
     formula <- getLine
     let parsedFormula = removeUnusedChars formula
     let finalParsedFormula = addExternalParenthesis parsedFormula
@@ -22,12 +21,9 @@ main = do
     let subFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
     print subFormulas
     let varList = [[x]|x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
-    let ordVarList = sort(varList)
-    let _ordVarList = concat ordVarList --TRANSFORMA A LISTA DE VARIAVEIS EM STRING PARA DEPOIS TRANSFORMAR EM DUPLAS [(VARIAVEL,BOOL)]
-    --let variaveis = listToPair _ordVarList
-    --print variaveis
-    let entries = nub ordVarList ++ subFormulas --CONSERTAR OPERADOR (->) NO CABEÇALHO
-    --let res = 
+    let l = [binaryList(toBinary x) (length varList) | x <- [0..2^(length (varList))-1]]
+    print(l)
+    let entries = nub varList ++ subFormulas --CONSERTAR OPERADOR (->) NO CABEÇALHO
     print entries
 
 removeUnusedChars :: [Char] -> [Char]
@@ -45,18 +41,25 @@ addExternalParenthesis :: String -> String
 addExternalParenthesis [] = []
 addExternalParenthesis (x:xs) = if x/='(' then "("++x:xs++")" else x:xs
 
+cleanBinary (x:xs) = if x == 0 then xs else x:xs
+
+binaryList bin n = (replicate (n + 1 - length bin) 0) ++ cleanBinary(reverse bin)
+
+toBinary :: Int -> [Int]
+toBinary 0 = [0]
+toBinary n = mod n 2:toBinary(div n 2)
+  
+reverseList [] = []
+reverseList (x:xs) = reverseList xs ++ [x]
+
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
 
---listToPair :: [Char] -> [(Char,Bool)]
---listToPair = map(\[a]->[(a,True)])
-
-resolve :: Formula -> [(Letra, Bool)] -> Bool --RECEBE A SUBFÓRMULA COM AS LETRAS, ONDE CADA LETRA VAI TER O SEU VALOR E RETORNARÁ UM BOOL
-resolve (Var a) xs = fromJust(lookup a xs) --RETORNA O VALOR QUE ESTÁ JUNTO COM A LETRA, NO CASO 0 OU 1
+resolve :: Formula -> [Bool] -> Bool --RECEBE A SUBFÓRMULA COM AS LETRAS, ONDE CADA LETRA VAI TER O SEU VALOR E RETORNARÁ UM BOOL
 resolve (Conjuncao a b) xs = (resolve a xs) && (resolve b xs)
 resolve (Disjuncao a b) xs = (resolve a xs) || (resolve b xs)
 resolve (Implicacao a b) xs = not(resolve a xs) || (resolve b xs)
 resolve (Negacao a Empty) xs = not(resolve a xs) 
- 
---RESOLVER RECURSIVAMENTE AS FÓRMULAS A ESQUERDA E A DIREITA, P/CADA SUBFORMULA EM subFormulas
 
+operators = [(Implicacao, '-'), (Disjuncao, '|'), (Conjuncao, '&'), (Negacao, '~')] --OPERADORES SUPORTADOS
+--RESOLVER RECURSIVAMENTE AS FÓRMULAS A ESQUERDA E A DIREITA, P/CADA SUBFORMULA EM subFormulas
