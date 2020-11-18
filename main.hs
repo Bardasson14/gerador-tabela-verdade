@@ -7,8 +7,9 @@ type Letra = Char
 data Formula = Var Letra
   | Conjuncao Formula Formula
   | Disjuncao Formula Formula
-  | Negacao Formula
+  | Negacao Formula Formula
   | Implicacao Formula Formula
+  | Empty
 
 main = do 
     putStrLn "Digite a fórmula: "
@@ -26,6 +27,7 @@ main = do
     --let variaveis = listToPair _ordVarList
     --print variaveis
     let entries = nub ordVarList ++ subFormulas --CONSERTAR OPERADOR (->) NO CABEÇALHO
+    --let res = 
     print entries
 
 removeUnusedChars :: [Char] -> [Char]
@@ -41,7 +43,7 @@ getMatchingParenthesis = aux 0 []
 
 addExternalParenthesis :: String -> String
 addExternalParenthesis [] = []
-addExternalParenthesis (x:xs) = "("++x:xs++")"
+addExternalParenthesis (x:xs) = if x/='(' then "("++x:xs++")" else x:xs
 
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
@@ -54,8 +56,7 @@ resolve (Var a) xs = fromJust(lookup a xs) --RETORNA O VALOR QUE ESTÁ JUNTO COM
 resolve (Conjuncao a b) xs = (resolve a xs) && (resolve b xs)
 resolve (Disjuncao a b) xs = (resolve a xs) || (resolve b xs)
 resolve (Implicacao a b) xs = not(resolve a xs) || (resolve b xs)
-resolve (Negacao a) xs = not(resolve a xs) 
-
-operators = ["-", "|", "&", "~"] --OPERADORES SUPORTADOS
+resolve (Negacao a Empty) xs = not(resolve a xs) 
+ 
 --RESOLVER RECURSIVAMENTE AS FÓRMULAS A ESQUERDA E A DIREITA, P/CADA SUBFORMULA EM subFormulas
 
