@@ -22,7 +22,8 @@ main = do
     print subFormulas
     let varList = [[x]|x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
     let l = [binaryList(toBinary x) (length varList) | x <- [0..2^(length (varList))-1]]
-    print(l)
+    let truthTable = reverseList l
+    print(truthTable)
     let entries = nub varList ++ subFormulas --CONSERTAR OPERADOR (->) NO CABEÇALHO
     print entries
 
@@ -63,3 +64,6 @@ resolve (Negacao a Empty) xs = not(resolve a xs)
 
 operators = [(Implicacao, '-'), (Disjuncao, '|'), (Conjuncao, '&'), (Negacao, '~')] --OPERADORES SUPORTADOS
 --RESOLVER RECURSIVAMENTE AS FÓRMULAS A ESQUERDA E A DIREITA, P/CADA SUBFORMULA EM subFormulas
+
+-- generateAuxList :: [[Char]] -> [[Char]] -> [Bool] -> [Char] -> (String,Bool)
+-- generateAuxList varList subFormulas truthTable x = 
