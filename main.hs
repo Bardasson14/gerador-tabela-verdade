@@ -1,9 +1,12 @@
 import Data.List
 --import Data.Function
---import Data.Maybe (fromJust)
+import Data.Maybe
+import Data.Typeable
 
 type Letra = Char
-data Formula = Var Letra
+
+data Formula =
+  T | F | Var Char | Val Bool
   | Conjuncao Formula Formula
   | Disjuncao Formula Formula
   | Negacao Formula Formula
@@ -25,6 +28,14 @@ main = do
     let l = reverseList truthTable
     let parsedTT = [parseTTLine x | x<-l]
     let entries = nub varList ++ subFormulas --CONSERTAR OPERADOR (->) NO CABEÇALHO
+    let tt = [zip varList x | x<-parsedTT]
+    --let abc = finalParsedFormula!!1
+    let xy = 'a'
+    let yz = 'b'
+    let dce = resolve (Conjuncao (Var xy) (Var yz)) [('a',True),('b',True)]
+    print(dce)
+    --let elem1 = fromJust(lookup h operators)
+    --let aux_pairs = [resolve(fromJust (lookup (head finalParsedFormula) operators)) (fromJust (lookup finalParsedFormula!!1 x)) (fromJust (lookup (finalParsedFormula!!2) x))|x<-tt]
     print entries
     print parsedTT
 
@@ -57,7 +68,8 @@ reverseList (x:xs) = reverseList xs ++ [x]
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
 
-resolve :: Formula -> [Bool] -> Bool --RECEBE A SUBFÓRMULA COM AS LETRAS, ONDE CADA LETRA VAI TER O SEU VALOR E RETORNARÁ UM BOOL
+resolve :: Formula -> [(Letra,Bool)] -> Bool --RECEBE A SUBFÓRMULA COM AS LETRAS, ONDE CADA LETRA VAI TER O SEU VALOR E RETORNARÁ UM BOOL
+resolve (Var v) bs      = fromJust (lookup v bs)
 resolve (Conjuncao a b) xs = (resolve a xs) && (resolve b xs)
 resolve (Disjuncao a b) xs = (resolve a xs) || (resolve b xs)
 resolve (Implicacao a b) xs = not(resolve a xs) || (resolve b xs)
