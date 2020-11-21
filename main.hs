@@ -1,17 +1,18 @@
 import Data.List
 --import Data.Function
 import Data.Maybe
-import Data.Typeable
+--import Data.Typeable
 
 type Letra = Char
 
 data Formula =
-  T | F | Var Char | Val Bool
+  T | F | Var Char | Val Bool 
   | Conjuncao Formula Formula
   | Disjuncao Formula Formula
   | Negacao Formula Formula
   | Implicacao Formula Formula
   | Empty
+
 
 main = do 
     putStrLn "Digite a fórmula:"
@@ -23,27 +24,29 @@ main = do
     --print(finalParsedFormula)
     let subFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
     --print subFormulas
-    let varList = [[x]|x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
+    let varList = [ x |x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
     let truthTable = [binaryList(toBinary x) (length varList) | x <- [0..2^(length (varList))-1]]
     let l = reverseList truthTable
     let parsedTT = [parseTTLine x | x<-l]
-    let entries = nub varList ++ subFormulas --CONSERTAR OPERADOR (->) NO CABEÇALHO
+    --let tempVarList = map toChar varList
     let tt = [zip varList x | x<-parsedTT]
-    --let abc = finalParsedFormula!!1
-    let xy = 'a'
-    let yz = 'b'
-    let dce = resolve (Negacao (Var 'a') Empty) [('a',True),('b',True)]
-    print(dce)
-    --let _h = fromJust(lookup '&' operators)
-    --let elem1 = fromJust(lookup h operators)
-    let op = getOperation '&' (Var 'a') (Var 'a')
-    let aux_pairs = [resolve( getOperation fromJust (lookup finalParsedFormula!!1 x) (Var (fromJust (lookup finalParsedFormula!!2 x))) (Var (fromJust (lookup finalParsedFormula!!3 x))) [('a',False),('b',True)] x)|x<-tt]
-    -- print entries
-    -- print parsedTT
+    --no momento, passando 
+    --getop char bool bool
+    let aux_pairs = [resolve (getOperation (finalParsedFormula!!1) (Val (fromJust(lookup (finalParsedFormula!!2) x))) (Val (fromJust(lookup (finalParsedFormula!!3) x)))) x |x<-tt]
+    print tt
     print aux_pairs
+
+--toChar:: [Char] -> Char
+--toChar c = c!!0
+
+--toFormula :: String -> Formula 
+
 
 removeUnusedChars :: [Char] -> [Char]
 removeUnusedChars formula = [c | c <- formula, c /= ' ', c /='>']
+
+getCharOnIndex :: String -> Int -> Char
+getCharOnIndex str i = str!!i
 
 getMatchingParenthesis :: String -> [(Int, Int)]
 getMatchingParenthesis = aux 0 []
@@ -69,10 +72,11 @@ reverseList [] = []
 reverseList (x:xs) = reverseList xs ++ [x]
 
 --getOperation :: Char -> Formula -> Formula -> Formula
-getOperation '&' a b = Conjuncao a b
-getOperation '|' a b = Disjuncao a b
-getOperation '~' a Empty = Negacao a Empty
-getOperation '-' a b = Implicacao a b
+getOperation :: Char -> Formula -> Formula -> Formula
+getOperation '&' a b = (Conjuncao a b)
+getOperation '|' a b = (Disjuncao a b)
+getOperation '~' a b = (Negacao a Empty)
+getOperation '-' a b = (Implicacao a b)
 
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
