@@ -32,12 +32,15 @@ main = do
     --let abc = finalParsedFormula!!1
     let xy = 'a'
     let yz = 'b'
-    let dce = resolve (Conjuncao (Var xy) (Var yz)) [('a',True),('b',True)]
+    let dce = resolve (Negacao (Var 'a') Empty) [('a',True),('b',True)]
     print(dce)
+    --let _h = fromJust(lookup '&' operators)
     --let elem1 = fromJust(lookup h operators)
-    --let aux_pairs = [resolve(fromJust (lookup (head finalParsedFormula) operators)) (fromJust (lookup finalParsedFormula!!1 x)) (fromJust (lookup (finalParsedFormula!!2) x))|x<-tt]
-    print entries
-    print parsedTT
+    let op = getOperation '&' (Var 'a') (Var 'a')
+    let aux_pairs = [resolve( getOperation fromJust (lookup finalParsedFormula!!1 x) (Var (fromJust (lookup finalParsedFormula!!2 x))) (Var (fromJust (lookup finalParsedFormula!!3 x))) [('a',False),('b',True)] x)|x<-tt]
+    -- print entries
+    -- print parsedTT
+    print aux_pairs
 
 removeUnusedChars :: [Char] -> [Char]
 removeUnusedChars formula = [c | c <- formula, c /= ' ', c /='>']
@@ -65,6 +68,12 @@ toBinary n = mod n 2:toBinary(div n 2)
 reverseList [] = []
 reverseList (x:xs) = reverseList xs ++ [x]
 
+--getOperation :: Char -> Formula -> Formula -> Formula
+getOperation '&' a b = Conjuncao a b
+getOperation '|' a b = Disjuncao a b
+getOperation '~' a Empty = Negacao a Empty
+getOperation '-' a b = Implicacao a b
+
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
 
@@ -78,7 +87,7 @@ resolve (Negacao a Empty) xs = not(resolve a xs)
 parseTTLine line = [toBool x|x<-line]
 toBool 0 = False
 toBool 1 = True
-operators = [(Implicacao, '-'), (Disjuncao, '|'), (Conjuncao, '&'), (Negacao, '~')] --OPERADORES SUPORTADOS
+operators = [(Implicacao,'-'), (Disjuncao,'|'), (Conjuncao,'&'), (Negacao,'~')] --OPERADORES SUPORTADOS
 --RESOLVER RECURSIVAMENTE AS FÓRMULAS A ESQUERDA E A DIREITA, P/CADA SUBFORMULA EM subFormulas
 
 -- generateAuxList :: [[Char]] -> [[Char]] -> [Bool] -> [Char] -> (String,Bool)
