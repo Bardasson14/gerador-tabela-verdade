@@ -23,7 +23,6 @@ main = do
     --GERAÇÃO DA TABELA VERDADE A PARTIR DA FINALPARSEDFORMULA
     let matchingParenthesisList = getMatchingParenthesis finalParsedFormula
     let subFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
-    print subFormulas
     let varList = [[x] |x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
     let truthTable = [binaryList(toBinary x) (length varList) | x <- [0..2^length (varList)-1]]
     let l = reverseList truthTable
@@ -33,8 +32,15 @@ main = do
     let tt_vars = [beautifyTTLine (map snd x) | x<-tt]
     let subFormulaResults = [(beautifyTTLine (resolveLine x subFormulas)) | x <- tt]
     let final_tt = [stringifyTTLine(generateTTLine (tt_vars!!x) (subFormulaResults!!x)) |x<-[0..length(tt_vars)-1]]
-    print (stringifyTTLine tt_header)
+    --print(map last tt_vars)
+    let check = countT(map last subFormulaResults)
+    print(stringifyTTLine tt_header)
     mapM_ print final_tt
+    putStrLn("")
+    putStrLn("")
+    if (check==0) then print("Formula insatisfativel") else print("Formula satisfativel")
+    if (check==length(tt_vars)) then print("Tautologia") else putStrLn("")
+
 
 generateTTLine :: [[Char]] -> [[Char]] -> [[Char]]
 generateTTLine tt_vars tt_subformulas = tt_vars ++ tt_subformulas
@@ -42,7 +48,7 @@ generateTTLine tt_vars tt_subformulas = tt_vars ++ tt_subformulas
 beautifyTTLine tt_line = [if x then "T" else "F" |x<-tt_line]
 
 stringifyTTLine :: [[Char]] -> [Char]
-stringifyTTLine  = intercalate " | "
+stringifyTTLine  = intercalate " || "
 
 resolveLine :: [([Char], Bool)] -> [String] -> [Bool]
 resolveLine tt_line subFormulas = [resolve (stringToFormula x) tt_line | x<-subFormulas]
@@ -51,6 +57,7 @@ resolveLine tt_line subFormulas = [resolve (stringToFormula x) tt_line | x<-subF
 getValue :: [Char] -> [([Char], Bool)] -> Bool
 getValue str tt =  fromJust(lookup str tt)
 
+countT l = if length (filter (\x -> (x=="T")) l) > 0 then length (filter (\x -> (x=="T")) l) else 0
 
 --PEGA SUBFORMULAS DE UMA FORMULA, IGORANDO PARENTESES ANINHADOS
 stringToFormula :: String -> Formula
