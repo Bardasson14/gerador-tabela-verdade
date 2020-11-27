@@ -61,19 +61,14 @@ stringToFormula str |
  |(((str!!0) == '&') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Conjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))])))) 
  |((str!!0 == '&')&&(fst(head(getExternalSubFormulas str (getMatchingParenthesis str)))) == 1) = Conjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Var ([str!!(snd(head(getExternalSubFormulas str (getMatchingParenthesis str)))+1)]))
  |(str!!0 == '&') = Conjuncao (Var [str!!1]) (stringToFormula (head(sliceSubFormulas str (getExternalSubFormulas str (getMatchingParenthesis str))))) 
-
- --aplicar casos com só uma subformula
-
  |(((str!!0) == '|') && (length str == 3)) = Disjuncao (Var ([str!!1])) (Var ([str!!2]))  
  |(((str!!0) == '|') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Disjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))])))) 
- |((str!!0 == '|')&&(fst(head(getExternalSubFormulas str (getMatchingParenthesis str)))) == 1) = Disjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Var ([str!!(snd(head(getExternalSubFormulas str (getMatchingParenthesis str)))+1)]))
+ |((str!!0 == '|') && (fst(head(getExternalSubFormulas str (getMatchingParenthesis str)))) == 1) = Disjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Var ([str!!(snd(head(getExternalSubFormulas str (getMatchingParenthesis str)))+1)]))
  |(str!!0 == '|') = Disjuncao (Var [str!!1]) (stringToFormula (head(sliceSubFormulas str (getExternalSubFormulas str (getMatchingParenthesis str))))) 
-
  |(((str!!0) == '-') && (length str == 3)) = Implicacao (Var ([str!!1])) (Var ([str!!2]))  
  |(((str!!0) == '-') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Implicacao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))]))))
  |((str!!0 == '-')&&(fst(head(getExternalSubFormulas str (getMatchingParenthesis str)))) == 1) = Implicacao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Var ([str!!(snd(head(getExternalSubFormulas str (getMatchingParenthesis str)))+1)]))
  |(str!!0 == '-') = Implicacao (Var [str!!1]) (stringToFormula (head(sliceSubFormulas str (getExternalSubFormulas str (getMatchingParenthesis str))))) 
- 
  |(((str!!0) == '~') && ((length str == 2))) =  Negacao (Var[str!!1]) (Empty)
  |(str!!0 == '~') = Negacao (stringToFormula(head (sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Empty)
 
