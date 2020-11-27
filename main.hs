@@ -13,6 +13,7 @@ data Formula =
   | Negacao Formula Formula
   | Empty
   deriving Show
+
   
 main = do 
     putStrLn "Digite a fórmula:"
@@ -20,47 +21,68 @@ main = do
     let parsedFormula = removeUnusedChars formula
     --let finalParsedFormula = addExternalParenthesis parsedFormula
     let finalParsedFormula = parsedFormula
+
+    --GERAÇÃO DA TABELA VERDADE A PARTIR DA FINALPARSEDFORMULA
     let matchingParenthesisList = getMatchingParenthesis finalParsedFormula
     let subFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
+    print subFormulas
     let varList = [[x] |x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
-    
     let truthTable = [binaryList(toBinary x) (length varList) | x <- [0..2^length (varList)-1]]
     let l = reverseList truthTable
     let parsedTT = [parseTTLine x | x<-l]
-    let tt = [zip varList x | x<-parsedTT] 
+    let tt = [zip varList x | x<-parsedTT]
+    let r = [resolveLine x subFormulas | x <- tt]
+    --print(tt)
+    print (zip tt (displayTT r))
+    --print(finalParsedFormula)
+    --print (getExternalSubFormulas finalParsedFormula matchingParenthesisList)
+    --print tt 
+    ---
 
-    let m = filter (\x -> (length x /= 0)) (allNested (sort matchingParenthesisList))
-    let nestedParenthesis = nub (concat m)
-    print nestedParenthesis
-    let subformulasP = [x|x<- matchingParenthesisList, x `notElem` nestedParenthesis] 
-    --TÁ FUNCIONANDO 
-    --let test = [resolve(stringToFormula (finalParsedFormula!!0) finalParsedFormula x) | x<-tt]
-    --let a = stringToFormula (finalParsedFormula!!1) finalParsedFormula
-    --let solved = [resolve(stringToFormula (finalParsedFormula!!1) finalParsedFormula) (x)|x<-tt]
-    --print solved
-    --print subformulasP
-    --print (stringToFormula (finalParsedFormula!!0) finalParsedFormula (length subformulasP) (subformulasP))
-    print tt
-    let r = [resolve(stringToFormula (finalParsedFormula!!0) finalParsedFormula (length subformulasP) (subformulasP)) x | x<-tt]
-    print r
-    print subFormulas
+    --print tt
+    --RESOLVER PARA CADA LINHA DA TABELA VERDADE (LISTA DE VARIÁVEIS + SUBFORMULAS)
+    --print r
+    --print subFormulas
+
+displayTT tt = [beautifyTTLine x | x<-tt]
+beautifyTTLine tt_line = [if x then "T" else "F" |x<-tt_line]
+
+resolveLine tt_line subFormulas = [resolve (stringToFormula x) tt_line | x<-subFormulas]
     
---botar variaveis na tabela verdade
+--ASSOCIA VALORES BOOLEANOS ÀS VARIÁVEIS
 getValue :: [Char] -> [([Char], Bool)] -> Bool
 getValue str tt =  fromJust(lookup str tt)
 
+
+--PEGA SUBFORMULAS DE UMA FORMULA, IGORANDO PARENTESES ANINHADOS
+getExternalSubFormulas formula matchingParenthesis= [x|x<-matchingParenthesis, x `notElem` getInternalSubFormulas formula]
+  
+getInternalSubFormulas formula = nub (concat (filter (\x -> (length x /= 0)) (allNested (sort (getMatchingParenthesis formula)))))
+--retorna subformulas em parenteses não aninhados (util p separar a string)
+
 --AINDA ESTÁ LIDANDO APENAS COM FÓRMULAS SIMPLES
 --USAR SLICE SUBFORMULAS
---PARAMETROS: OPERADOR STRING E NUMERO DE SUBFORMULAS CONTIDAS
-stringToFormula :: Char -> [Char] -> Int -> [(Int,Int)]-> Formula
-stringToFormula '&' str 0 [] = Conjuncao (Var ([str!!1])) (Var ([str!!2]))
-stringToFormula '-' str 0 [] = Implicacao (Var ([str!!1])) (Var ([str!!2]))
-stringToFormula '|' str 0 [] = Disjuncao (Var ([str!!1])) (Var ([str!!2]))
-stringToFormula '~' str 0 [] = Negacao (Var([str!!1])) Empty
+--PARAMETROS: OPERADOR STRING E NUMERO D
+
+stringToFormula :: String -> Formula
+stringToFormula str |
+ (((str!!0) == '&') && (length str == 3)) = Conjuncao (Var ([str!!1])) (Var ([str!!2]))  
+ |(((str!!0) == '&') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Conjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))])))) | (((str!!0) == '|') && (length str == 3)) = Disjuncao (Var ([str!!1])) (Var ([str!!2]))  
+ |(((str!!0) == '&') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Disjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))])))) 
+ |(((str!!0) == '-') && (length str == 3)) = Implicacao (Var ([str!!1])) (Var ([str!!2]))  
+ |(((str!!0) == '-') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Implicacao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))]))))
+
+--falta a negação
+ 
+
+
+
+
+--stringToFormula '-' str = Implicacao (Var ([str!!1])) (Var ([str!!2]))
+--stringToFormula '|' str = Disjuncao (Var ([str!!1])) (Var ([str!!2]))
+--stringToFormula '~' str = Negacao (Var([str!!1])) Empty
 --fazer p/ 1 esq dir
-stringToFormula '&' str 2 (x:xs) = Conjuncao (Var (head (sliceSubFormulas str [x]))) (Var(last(sliceSubFormulas str xs)))
-stringToFormula '-' str 2 (x:xs) = Implicacao (Var (head (sliceSubFormulas str [x]))) (Var(last(sliceSubFormulas str xs)))
-stringToFormula '|' str 2 (x:xs) = Disjuncao (Var (head (sliceSubFormulas str [x]))) (Var (last(sliceSubFormulas str xs)))
+
 
 generateNestedParenthesisList :: (Ord a1, Ord a2) => a1 -> a2 -> [(a1, a2)] -> [(a1, a2)]
 generateNestedParenthesisList start end matchingParenthesis = [ x | x <- (sort matchingParenthesis), (fst x) > start, (snd x) < end]
