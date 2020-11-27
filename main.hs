@@ -14,13 +14,13 @@ data Formula =
   | Empty
   deriving Show
 
-  
+--INPUT QUE CAUSOU ERRO: -> (&ab)(|(->cd)(|ef))
 main = do 
     putStrLn "Digite a fórmula:"
     formula <- getLine
     let parsedFormula = removeUnusedChars formula
-    --let finalParsedFormula = addExternalParenthesis parsedFormula
-    let finalParsedFormula = parsedFormula
+    let finalParsedFormula = addExternalParenthesis parsedFormula
+    --let finalParsedFormula = parsedFormula
 
     --GERAÇÃO DA TABELA VERDADE A PARTIR DA FINALPARSEDFORMULA
     let matchingParenthesisList = getMatchingParenthesis finalParsedFormula
@@ -55,33 +55,27 @@ getValue str tt =  fromJust(lookup str tt)
 
 
 --PEGA SUBFORMULAS DE UMA FORMULA, IGORANDO PARENTESES ANINHADOS
-getExternalSubFormulas formula matchingParenthesis= [x|x<-matchingParenthesis, x `notElem` getInternalSubFormulas formula]
-  
-getInternalSubFormulas formula = nub (concat (filter (\x -> (length x /= 0)) (allNested (sort (getMatchingParenthesis formula)))))
---retorna subformulas em parenteses não aninhados (util p separar a string)
-
---AINDA ESTÁ LIDANDO APENAS COM FÓRMULAS SIMPLES
---USAR SLICE SUBFORMULAS
---PARAMETROS: OPERADOR STRING E NUMERO D
-
 stringToFormula :: String -> Formula
 stringToFormula str |
  (((str!!0) == '&') && (length str == 3)) = Conjuncao (Var ([str!!1])) (Var ([str!!2]))  
- |(((str!!0) == '&') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Conjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))])))) | (((str!!0) == '|') && (length str == 3)) = Disjuncao (Var ([str!!1])) (Var ([str!!2]))  
- |(((str!!0) == '&') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Disjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))])))) 
+ |(((str!!0) == '&') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Conjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))])))) 
+ |((str!!0 == '&')&&(fst(head(getExternalSubFormulas str (getMatchingParenthesis str)))) == 1) = Conjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Var ([str!!(snd(head(getExternalSubFormulas str (getMatchingParenthesis str)))+1)]))
+ |(str!!0 == '&') = Conjuncao (Var [str!!1]) (stringToFormula (head(sliceSubFormulas str (getExternalSubFormulas str (getMatchingParenthesis str))))) 
+
+ --aplicar casos com só uma subformula
+
+ |(((str!!0) == '|') && (length str == 3)) = Disjuncao (Var ([str!!1])) (Var ([str!!2]))  
+ |(((str!!0) == '|') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Disjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))])))) 
+ |((str!!0 == '|')&&(fst(head(getExternalSubFormulas str (getMatchingParenthesis str)))) == 1) = Disjuncao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Var ([str!!(snd(head(getExternalSubFormulas str (getMatchingParenthesis str)))+1)]))
+ |(str!!0 == '|') = Disjuncao (Var [str!!1]) (stringToFormula (head(sliceSubFormulas str (getExternalSubFormulas str (getMatchingParenthesis str))))) 
+
  |(((str!!0) == '-') && (length str == 3)) = Implicacao (Var ([str!!1])) (Var ([str!!2]))  
  |(((str!!0) == '-') && ((length (getExternalSubFormulas str (getMatchingParenthesis str))) == 2)) = Implicacao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) ((stringToFormula (head(sliceSubFormulas str [last(getExternalSubFormulas str (getMatchingParenthesis str))]))))
-
---falta a negação
+ |((str!!0 == '|')&&(fst(head(getExternalSubFormulas str (getMatchingParenthesis str)))) == 1) = Implicacao (stringToFormula (head(sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Var ([str!!(snd(head(getExternalSubFormulas str (getMatchingParenthesis str)))+1)]))
+ |(str!!0 == '|') = Implicacao (Var [str!!1]) (stringToFormula (head(sliceSubFormulas str (getExternalSubFormulas str (getMatchingParenthesis str))))) 
  
-
-
-
-
---stringToFormula '-' str = Implicacao (Var ([str!!1])) (Var ([str!!2]))
---stringToFormula '|' str = Disjuncao (Var ([str!!1])) (Var ([str!!2]))
---stringToFormula '~' str = Negacao (Var([str!!1])) Empty
---fazer p/ 1 esq dir
+ |(((str!!0) == '~') && ((length str == 2))) =  Negacao (Var[str!!1]) (Empty)
+ |(str!!0 == '~') = Negacao (stringToFormula(head (sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Empty)
 
 
 generateNestedParenthesisList :: (Ord a1, Ord a2) => a1 -> a2 -> [(a1, a2)] -> [(a1, a2)]
@@ -89,6 +83,11 @@ generateNestedParenthesisList start end matchingParenthesis = [ x | x <- (sort m
 
 allNested :: (Ord a1, Ord a2) => [(a1, a2)] -> [[(a1, a2)]]
 allNested matchingParenthesis = [(generateNestedParenthesisList (fst x) (snd x) matchingParenthesis) | x<-matchingParenthesis] 
+  
+getInternalSubFormulas formula = nub (concat (filter (\x -> (length x /= 0)) (allNested (sort (getMatchingParenthesis formula)))))
+--retorna subformulas em parenteses não aninhados (util p separar a string)
+
+getExternalSubFormulas formula matchingParenthesis= [x|x<-matchingParenthesis, x `notElem` getInternalSubFormulas formula]
 
 removeUnusedChars :: [Char] -> [Char]
 removeUnusedChars formula = [c | c <- formula, c /= ' ', c /='>']
