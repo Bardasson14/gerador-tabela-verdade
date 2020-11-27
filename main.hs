@@ -20,8 +20,6 @@ main = do
     formula <- getLine
     let parsedFormula = removeUnusedChars formula
     let finalParsedFormula = addExternalParenthesis parsedFormula
-    --let finalParsedFormula = parsedFormula
-
     --GERAÇÃO DA TABELA VERDADE A PARTIR DA FINALPARSEDFORMULA
     let matchingParenthesisList = getMatchingParenthesis finalParsedFormula
     let subFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
@@ -31,22 +29,22 @@ main = do
     let l = reverseList truthTable
     let parsedTT = [parseTTLine x | x<-l]
     let tt = [zip varList x | x<-parsedTT]
-    let r = [resolveLine x subFormulas | x <- tt]
-    --print(tt)
-    print (zip tt (displayTT r))
-    --print(finalParsedFormula)
-    --print (getExternalSubFormulas finalParsedFormula matchingParenthesisList)
-    --print tt 
-    ---
+    let tt_header = varList ++ subFormulas
+    let tt_vars = [beautifyTTLine (map snd x) | x<-tt]
+    let subFormulaResults = [(beautifyTTLine (resolveLine x subFormulas)) | x <- tt]
+    let final_tt = [stringifyTTLine(generateTTLine (tt_vars!!x) (subFormulaResults!!x)) |x<-[0..length(tt_vars)-1]]
+    print (stringifyTTLine tt_header)
+    mapM_ print final_tt
 
-    --print tt
-    --RESOLVER PARA CADA LINHA DA TABELA VERDADE (LISTA DE VARIÁVEIS + SUBFORMULAS)
-    --print r
-    --print subFormulas
+generateTTLine :: [[Char]] -> [[Char]] -> [[Char]]
+generateTTLine tt_vars tt_subformulas = tt_vars ++ tt_subformulas
 
-displayTT tt = [beautifyTTLine x | x<-tt]
 beautifyTTLine tt_line = [if x then "T" else "F" |x<-tt_line]
 
+stringifyTTLine :: [[Char]] -> [Char]
+stringifyTTLine  = intercalate " | "
+
+resolveLine :: [([Char], Bool)] -> [String] -> [Bool]
 resolveLine tt_line subFormulas = [resolve (stringToFormula x) tt_line | x<-subFormulas]
     
 --ASSOCIA VALORES BOOLEANOS ÀS VARIÁVEIS
@@ -71,6 +69,7 @@ stringToFormula str |
  |(str!!0 == '-') = Implicacao (Var [str!!1]) (stringToFormula (head(sliceSubFormulas str (getExternalSubFormulas str (getMatchingParenthesis str))))) 
  |(((str!!0) == '~') && ((length str == 2))) =  Negacao (Var[str!!1]) (Empty)
  |(str!!0 == '~') = Negacao (stringToFormula(head (sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Empty)
+
 
 
 generateNestedParenthesisList :: (Ord a1, Ord a2) => a1 -> a2 -> [(a1, a2)] -> [(a1, a2)]
@@ -100,7 +99,6 @@ addExternalParenthesis [] = []
 addExternalParenthesis (x:xs) = if x/='(' then "("++x:xs++")" else x:xs
 
 cleanBinary (x:xs) = if x == 0 then xs else x:xs
-
 binaryList bin n = (replicate (n + 1 - length bin) 0) ++ cleanBinary(reverse bin)
 
 toBinary :: Int -> [Int]
