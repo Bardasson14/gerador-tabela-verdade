@@ -1,0 +1,33 @@
+Observação sobre a Tabela Verdade:
+    (-) é o mesmo que (->)
+
+Para executar o código, é necessário apenas utilizar
+    runhaskell main.hs
+e então entrar com o input
+
+Exemplos de input:
+->ab
+&(~(|ab))(->cd)
+|a(~a)
+->(&cd)(|a(~c))
+
+Divisão do Trabalho:
+
+generateTTLine -> 
+beautifyTTLine -> 
+stringifyTTLine -> 
+resolveLine -> 
+getValue
+stringToFormula -> 
+generateNestedParenthesisList
+allNested
+getExternalSubFormulas
+removeUnusedChars
+getMatchingParenthesis -> 
+addExternalParenthesis
+cleanBinary
+binaryList
+toBinary
+reverseList
+sliceSubFormulas
+resolve -> 
