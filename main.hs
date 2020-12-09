@@ -12,7 +12,7 @@ main = do
     -- Geração da lista de variáveis presentes na fórmula
     let varList = [[x] |x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
     -- Cabeçalho da tabela verdade terá variáveis e subfórmulas
-    let tt_header = varList ++ subFormulas
+    let tt_header = varList ++ (sliceSubFormulas (addExternalParenthesis formula) (getMatchingParenthesis (addExternalParenthesis formula)))
     -- Geração dos valores para a tabela verdade
     let truthTable = [binaryList(toBinary x) (length varList) | x <- [0..2^length (varList)-1]]
     let l = reverseList truthTable
