@@ -23,10 +23,8 @@ main = do
     -- List comprehension para resolver cada subfórmula de acordo com o valor correspondente na Tabela Verdade
     let subFormulaResults = [(beautifyTTLine (resolveLine x subFormulas)) | x <- tt]
     let final_tt = [stringifyTTLine(generateTTLine (tt_vars!!x) (subFormulaResults!!x)) |x<-[0..length(tt_vars)-1]]
-    
     print(stringifyTTLine tt_header)
     mapM_ print final_tt
-
     -- Checagem de satisfabilidade e tautologia
     let check = countT(map last subFormulaResults)
     putStrLn("")
