@@ -34,7 +34,3 @@ main = do
     putStrLn("")
     if (check==0) then print("Formula insatisfativel") else print("Formula satisfativel")
     if (check==length(tt_vars)) then print("Tautologia") else putStrLn("")
-
-
-
-
