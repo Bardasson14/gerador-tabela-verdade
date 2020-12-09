@@ -1,4 +1,5 @@
 import PropositionalLogic
+import Data.List (sort, nub)
 
 main = do 
     putStrLn "Digite a fórmula:"
@@ -6,13 +7,15 @@ main = do
     -- Formatação da fórmula, retirando caracteres inúteis e adicionando parênteses externos (se necessário)
     let parsedFormula = removeUnusedChars formula
     let finalParsedFormula = addExternalParenthesis parsedFormula
+    -- Geração da lista de variáveis presentes na fórmula
+    let initialVarList = [[x] |x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
+    let varList = sort (nub initialVarList)
     -- Geração da lista de parênteses correspondentes, que permitirá dividir a fórmula em subfórmulas
     let matchingParenthesisList = getMatchingParenthesis finalParsedFormula
-    let subFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
-    -- Geração da lista de variáveis presentes na fórmula
-    let varList = [[x] |x<-finalParsedFormula, x `elem` ['a'..'z'] || x `elem` ['A'..'Z']]
+    let slicedSubFormulas = sliceSubFormulas finalParsedFormula matchingParenthesisList
+    let subFormulas =  [ x | x<-slicedSubFormulas, x `notElem` varList] 
     -- Cabeçalho da tabela verdade terá variáveis e subfórmulas
-    let tt_header = varList ++ (sliceSubFormulas (addExternalParenthesis formula) (getMatchingParenthesis (addExternalParenthesis formula)))
+    let tt_header = varList ++ sliceSubFormulas (addExternalParenthesis formula) (getMatchingParenthesis (addExternalParenthesis formula))
     -- Geração dos valores para a tabela verdade
     let truthTable = [binaryList(toBinary x) (length varList) | x <- [0..2^length (varList)-1]]
     let l = reverseList truthTable
