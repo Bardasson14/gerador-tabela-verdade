@@ -29,6 +29,7 @@ getValue :: [Char] -> [([Char], Bool)] -> Bool
 getValue str tt =  fromJust(lookup str tt)
 
 --conta o número de T em uma coluna da tabela (no caso, a última será utilizada), para checar satisfabilidade e tautologia
+countT :: [[Char]] -> Int
 countT l = if length (filter (\x -> (x=="T")) l) > 0 then length (filter (\x -> (x=="T")) l) else 0
 
 --através da utilização de guards, converte strings em fórmulas que podem ser resolvidas
@@ -57,13 +58,14 @@ generateNestedParenthesisList start end matchingParenthesis = [ x | x <- (sort m
 allNested :: (Ord a1, Ord a2) => [(a1, a2)] -> [[(a1, a2)]]
 allNested matchingParenthesis = [(generateNestedParenthesisList (fst x) (snd x) matchingParenthesis) | x<-matchingParenthesis] 
   
+getInternalSubFormulas :: String -> [(Int, Int)]
 getInternalSubFormulas formula = nub (concat (filter (\x -> (length x /= 0)) (allNested (sort (getMatchingParenthesis formula)))))
 
 --retorna subformulas em parenteses não aninhados (util p separar a string)
 getExternalSubFormulas :: String -> [(Int, Int)] -> [(Int, Int)]
 getExternalSubFormulas formula matchingParenthesis= [x | x<-matchingParenthesis, x `notElem` getInternalSubFormulas formula]
 
---retorna lista de pares com indices de parenteses correspondentes
+--retorna lista de pares com indices de parênteses correspondentes
 getMatchingParenthesis :: String -> [(Int, Int)]
 getMatchingParenthesis = aux 0 []
   where
@@ -76,9 +78,10 @@ addExternalParenthesis :: String -> String
 addExternalParenthesis [] = []
 addExternalParenthesis (x:xs) = if x/='(' then "("++x:xs++")" else x:xs
 
+cleanBinary :: (Eq a, Num a) => [a] -> [a]
 cleanBinary (x:xs) = if x == 0 then xs else x:xs
 
---gera valor binario para a Tabela Verdade, que posteriormente sera convertido para T ou F
+--gera valor binário para a Tabela Verdade, que posteriormente será convertido para T ou F
 binaryList :: (Num a, Eq a) => [a] -> Int -> [a]
 binaryList bin n = (replicate (n + 1 - length bin) 0) ++ cleanBinary(reverse bin)
 
@@ -86,10 +89,11 @@ toBinary :: Int -> [Int]
 toBinary 0 = [0]
 toBinary n = mod n 2:toBinary(div n 2)
   
+reverseList :: [a] -> [a]
 reverseList [] = []
 reverseList (x:xs) = reverseList xs ++ [x]
 
---gera lista de subfórmulas fatiadas, baseado na lista de parenteses correspondentes
+--gera lista de subfórmulas fatiadas, baseado na lista de parênteses correspondentes
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
 
@@ -100,7 +104,10 @@ resolve (Or a b) xs = (resolve a xs) || (resolve b xs)
 resolve (Implication a b) xs = not(resolve a xs) || (resolve b xs)
 resolve (Not a Empty) xs = not(resolve a xs) 
 
+parseTTLine :: (Eq a, Num a) => [a] -> [Bool]
 parseTTLine line = [toBool x|x<-line]
+
+toBool :: (Eq a, Num a) => a -> Bool
 toBool 0 = False
 toBool 1 = True
 
