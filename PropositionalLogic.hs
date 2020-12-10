@@ -12,6 +12,7 @@ data Formula =
   | Not Formula Formula
   | Empty
   
+
 generateTTLine :: [[Char]] -> [[Char]] -> [[Char]]
 generateTTLine tt_vars tt_subformulas = tt_vars ++ tt_subformulas
 
@@ -20,16 +21,17 @@ beautifyTTLine tt_line = [if x then "T" else "F" |x<-tt_line]
 stringifyTTLine :: [[Char]] -> [Char]
 stringifyTTLine  = intercalate " || "
 
+--resolve subfórmulas, utilizando valores booleanos da linha atual na tabela verdade
 resolveLine :: [([Char], Bool)] -> [String] -> [Bool]
 resolveLine tt_line subFormulas = [resolve (stringToFormula x) tt_line | x<-subFormulas]
     
---ASSOCIA VALORES BOOLEANOS ÀS VARIÁVEIS
 getValue :: [Char] -> [([Char], Bool)] -> Bool
 getValue str tt =  fromJust(lookup str tt)
 
+--conta o número de T em uma coluna da tabela (no caso, a última será utilizada), para checar satisfabilidade e tautologia
 countT l = if length (filter (\x -> (x=="T")) l) > 0 then length (filter (\x -> (x=="T")) l) else 0
 
-
+--através da utilização de guards, converte strings em fórmulas que podem ser resolvidas
 stringToFormula :: String -> Formula
 stringToFormula str |
  (((str!!0) == '&') && (length str == 3)) = And (Var ([str!!1])) (Var ([str!!2]))  
@@ -56,14 +58,12 @@ allNested :: (Ord a1, Ord a2) => [(a1, a2)] -> [[(a1, a2)]]
 allNested matchingParenthesis = [(generateNestedParenthesisList (fst x) (snd x) matchingParenthesis) | x<-matchingParenthesis] 
   
 getInternalSubFormulas formula = nub (concat (filter (\x -> (length x /= 0)) (allNested (sort (getMatchingParenthesis formula)))))
+
 --retorna subformulas em parenteses não aninhados (util p separar a string)
-
 getExternalSubFormulas :: String -> [(Int, Int)] -> [(Int, Int)]
-getExternalSubFormulas formula matchingParenthesis= [x|x<-matchingParenthesis, x `notElem` getInternalSubFormulas formula]
+getExternalSubFormulas formula matchingParenthesis= [x | x<-matchingParenthesis, x `notElem` getInternalSubFormulas formula]
 
-removeUnusedChars :: [Char] -> [Char]
-removeUnusedChars formula = [c | c <- formula, c /= ' ', c /='>']
-
+--retorna lista de pares com indices de parenteses correspondentes
 getMatchingParenthesis :: String -> [(Int, Int)]
 getMatchingParenthesis = aux 0 []
   where
@@ -78,6 +78,7 @@ addExternalParenthesis (x:xs) = if x/='(' then "("++x:xs++")" else x:xs
 
 cleanBinary (x:xs) = if x == 0 then xs else x:xs
 
+--gera valor binario para a Tabela Verdade, que posteriormente sera convertido para T ou F
 binaryList :: (Num a, Eq a) => [a] -> Int -> [a]
 binaryList bin n = (replicate (n + 1 - length bin) 0) ++ cleanBinary(reverse bin)
 
@@ -88,6 +89,7 @@ toBinary n = mod n 2:toBinary(div n 2)
 reverseList [] = []
 reverseList (x:xs) = reverseList xs ++ [x]
 
+--gera lista de subfórmulas fatiadas, baseado na lista de parenteses correspondentes
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
 
@@ -101,3 +103,6 @@ resolve (Not a Empty) xs = not(resolve a xs)
 parseTTLine line = [toBool x|x<-line]
 toBool 0 = False
 toBool 1 = True
+
+removeUnusedChars :: [Char] -> [Char]
+removeUnusedChars formula = [c | c <- formula, c /= ' ', c /='>']
