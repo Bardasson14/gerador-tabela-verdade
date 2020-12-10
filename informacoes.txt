@@ -1,6 +1,17 @@
+TRABALHO FINAL - LINGUAGENS DE PROGRAMAÇÃO 
+GERADOR DE TABELAS VERDADE
+2020.1
+
+GRUPO: VITOR BARDASSON E VICTOR BRANDÃO
+
+- ROTEIRO DE EXECUÇÃO
 Para executar o código, é necessário apenas utilizar
     runhaskell main.hs
-e então entrar com o input
+e então entrar com o input após "Digite a fórmula:" aparecer no terminal 
+
+- ESPECIFICAÇÕES DO TRABALHO
+
+Foi utilizada a notação prefixada.
 
 Operadores suportados:
 Or:            |
@@ -9,32 +20,27 @@ Implication:   ->
 Not:           ~
 
 Exemplos de input:
-
 ->ab
 &(~(|ab))(->cd)
 |a(~a)
 ->(&cd)(|a(~c))
 
-Divisão do Trabalho:
+- DIVISÃO DO TRABALHO
 
 (generate/beautify/stringify)TTLine -> Vitor Bardasson
 resolveLine -> Victor Brandao
 getValue -> Victor Brandao
-
 stringToFormula -> Vitor Bardasson
 countT -> Vitor Bardasson
-
 generateNestedParenthesisList -> Vitor Bardasson
 allNested -> Vitor Bardasson
 getExternalSubFormulas -> Vitor Bardasson
 removeUnusedChars -> Victor Brandao
 getMatchingParenthesis -> Victor Brandao
 addExternalParenthesis -> Victor Brandao
-
 cleanBinary -> Vitor Bardasson
 binaryList -> Vitor Bardasson
 toBinary -> Victor Brandao
-
 reverseList -> Victor Brandao
 sliceSubFormulas -> Vitor Bardasson
 resolve -> Victor Brandao
