@@ -51,17 +51,19 @@ stringToFormula str |
  |(str!!0 == '~') = Not (stringToFormula(head (sliceSubFormulas str [head(getExternalSubFormulas str (getMatchingParenthesis str))]))) (Empty)
 
 
-
+--retorna todos os índices de parênteses internos a uma determinada subfórmula
 generateNestedParenthesisList :: (Ord a1, Ord a2) => a1 -> a2 -> [(a1, a2)] -> [(a1, a2)]
 generateNestedParenthesisList start end matchingParenthesis = [ x | x <- (sort matchingParenthesis), (fst x) > start, (snd x) < end]
 
+--retorna todos os índices de parênteses internos
 allNested :: (Ord a1, Ord a2) => [(a1, a2)] -> [[(a1, a2)]]
 allNested matchingParenthesis = [(generateNestedParenthesisList (fst x) (snd x) matchingParenthesis) | x<-matchingParenthesis] 
-  
+
+--retorna todos as subfórmulas que sejam internas a outras  
 getInternalSubFormulas :: String -> [(Int, Int)]
 getInternalSubFormulas formula = nub (concat (filter (\x -> (length x /= 0)) (allNested (sort (getMatchingParenthesis formula)))))
 
---retorna subformulas em parenteses não aninhados (util p separar a string)
+--retorna subformulas em parenteses não aninhados (util p separar a string na stringToFormula)
 getExternalSubFormulas :: String -> [(Int, Int)] -> [(Int, Int)]
 getExternalSubFormulas formula matchingParenthesis= [x | x<-matchingParenthesis, x `notElem` getInternalSubFormulas formula]
 
@@ -73,6 +75,7 @@ getMatchingParenthesis = aux 0 []
     aux currentIndex parenthesisStack ('(' : remainingString) = aux (currentIndex + 1) (currentIndex : parenthesisStack) remainingString
     aux currentIndex (lastOpenParenthesis:openParenthesis) (')' : remainingString) = (lastOpenParenthesis, currentIndex) : aux (currentIndex + 1) openParenthesis remainingString
     aux currentIndex parenthesisStack (c : remainingString) = aux (currentIndex + 1) parenthesisStack remainingString
+
 
 addExternalParenthesis :: String -> String
 addExternalParenthesis [] = []
@@ -97,7 +100,8 @@ reverseList (x:xs) = reverseList xs ++ [x]
 sliceSubFormulas :: [a] -> [(Int, Int)] -> [[a]]
 sliceSubFormulas formula matchingParenthesis = [take ((snd x)-(fst x)-1) (drop (fst x+1) formula) | x <- matchingParenthesis]
 
-resolve :: Formula -> [([Char],Bool)] -> Bool  --a corrigir
+--resolve as fórmulas
+resolve :: Formula -> [([Char],Bool)] -> Bool 
 resolve (Var v) bs      = fromJust(lookup v bs)
 resolve (And a b) xs = (resolve a xs) && (resolve b xs)
 resolve (Or a b) xs = (resolve a xs) || (resolve b xs)
